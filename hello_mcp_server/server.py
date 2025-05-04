@@ -35,9 +35,9 @@ def run_sse(host: str, port: int):
 # CLI
 @click.command()
 @click.option("--sse", is_flag=True, help="Start as SSE server (otherwise stdio).")
-@click.option("--host", default=lambda: os.getenv("MCP_HOST", "0.0.0.0"),
+@click.option("--host", default=lambda: os.getenv("HOST", "0.0.0.0"),
               show_default=True, help="Host for SSE mode")
-@click.option("--port", type=int, default=lambda: int(os.getenv("MCP_PORT", 8000)),
+@click.option("--port", type=int, default=lambda: int(os.getenv("PORT", 8000)),
               show_default=True, help="Port for SSE mode")
 def main(sse: bool, host: str, port: int):
     if sse:
