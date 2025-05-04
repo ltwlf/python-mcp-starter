@@ -108,6 +108,26 @@ docker build -t your-image-name .
 docker run -p 8000:8000 your-image-name
 ```
 
+## Microsoft Azure Deployment
+
+When deploying to Microsoft Azure App Service, a `requirements.txt` file is needed for the platform to properly install your Python dependencies. While this project uses `uv` for development dependency management, you can generate a compatible `requirements.txt` file using uv:
+
+```bash
+# Generate a requirements.txt file from your uv.lock file
+uv pip export --requirements > requirements.txt
+```
+
+For a successful deployment to Azure App Service:
+
+1. Generate the `requirements.txt` file as shown above
+2. Ensure your `startup.sh` file contains the correct command to start your MCP server:
+   ```bash
+   #!/bin/bash
+   python -m hello_mcp_server --sse --host 0.0.0.0 --port 8000
+   ```
+   Note: Replace `hello_mcp_server` with your actual package name if you renamed it.
+3. When deploying to Azure App Service, make sure all these files are included in your deployment package.
+
 ## Development
 
 ### Debugging
