@@ -1,0 +1,43 @@
+name: Python MCP Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+        
+    - name: Lint with isort
+      run: |
+        isort --check-only --profile black hello_world tests examples
+        
+    - name: Format with black
+      run: |
+        black --check hello_world tests examples
+        
+    - name: Type check with mypy
+      run: |
+        mypy hello_world
+        
+    - name: Test with pytest
+      run: |
+        pytest
