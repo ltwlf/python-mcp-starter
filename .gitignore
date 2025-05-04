@@ -39,3 +39,8 @@ htmlcov/
 
 # Lock files
 uv.lock
+# --- Azure App Service / Oryx artefacts ---
+oryx-manifest.toml
+output.tar.gz
+antenv/
+__oryx_packages__/
