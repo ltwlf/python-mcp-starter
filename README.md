@@ -91,7 +91,7 @@ Or with custom host and port:
 ```powershell
 # Ensure your virtual environment is active first
 # Replace 'hello-mcp-server' with your script name
-uv run your-script-name --sse --host 127.0.0.1 --port 9000
+uv run your-script-name --sse --host 127.0.0.1 --port 8000
 ```
 
 ### Docker Deployment
