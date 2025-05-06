@@ -3,6 +3,7 @@ Main entry point for the hello_world MCP application.
 This file contains the runner functions and CLI code.
 """
 import os
+from dotenv import load_dotenv
 import sys
 import anyio
 import click
@@ -24,6 +25,8 @@ def run_sse(host: str, port: int):
 @click.option("--port", type=int, default=lambda: int(os.getenv("PORT", 8000)),
               show_default=True, help="Port for SSE mode")
 def main(sse: bool, host: str, port: int):
+    # Load environment variables from .env file
+    load_dotenv()
     if sse:
         run_sse(host, port)
     else:

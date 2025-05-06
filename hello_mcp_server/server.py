@@ -1,17 +1,11 @@
 from mcp.server.fastmcp import FastMCP
 from mcp.server.sse import SseServerTransport
 from starlette.applications import Starlette
-from starlette.routing import Route, Mount
-from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.routing import Mount
 from starlette.middleware import Middleware
 import os
 
-class HeaderMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
-        response = await call_next(request)
-        if response.headers.get("content-type") == "text/event-stream; charset=utf-8":
-            response.headers["content-type"] = "text/event-stream"
-        return response
+from .header_middleware import HeaderMiddleware
 
 mcp = FastMCP("hello")
 
@@ -33,7 +27,7 @@ async def handle_sse(scope, receive, send):
 
 app = Starlette(
     routes=[
-        Mount("/sse", app=handle_sse),             # ← ⭐ pure-ASGI mount
+        Mount("/sse", app=handle_sse),
         Mount(messages_path, app=sse.handle_post_message),
     ],
     middleware=[Middleware(HeaderMiddleware)],
