@@ -1,27 +1,40 @@
-import os
-import anyio
-import click
-import uvicorn
-from starlette.applications import Starlette
-from starlette.routing import Mount
 from mcp.server.fastmcp import FastMCP
+from mcp.server.sse import SseServerTransport
+from starlette.applications import Starlette
+from starlette.routing import Route, Mount
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware import Middleware
+import os
 
-APP_ID = "hello-mcp-server"
-mcp = FastMCP(APP_ID)
+class HeaderMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        if response.headers.get("content-type") == "text/event-stream; charset=utf-8":
+            response.headers["content-type"] = "text/event-stream"
+        return response
 
-# Minimal Starlette app for SSE
-starlette_app = Starlette(routes=[Mount("/", app=mcp.sse_app())])
+mcp = FastMCP("hello")
 
-# Example tool
 @mcp.tool()
-def add(a: int, b: int) -> int:
-    """Add two numbers"""
-    return a + b
-
-
-# Add a dynamic greeting resource
-@mcp.resource("greeting://{name}")
-def get_greeting(name: str) -> str:
-    """Get a personalized greeting"""
+def say_hello(name: str) -> str:
     return f"Hello, {name}!"
 
+messages_path = "/messages/"
+
+public_host = os.getenv("PUBLIC_HOST")
+sse_url = f"{public_host}{messages_path}" if public_host else "http://localhost:8000/messages/"
+sse = SseServerTransport(sse_url)
+
+async def handle_sse(scope, receive, send):
+    async with sse.connect_sse(scope, receive, send) as streams:
+        await mcp._mcp_server.run(
+            *streams, mcp._mcp_server.create_initialization_options()
+        )
+
+app = Starlette(
+    routes=[
+        Mount("/sse", app=handle_sse),             # ← ⭐ pure-ASGI mount
+        Mount(messages_path, app=sse.handle_post_message),
+    ],
+    middleware=[Middleware(HeaderMiddleware)],
+)

@@ -7,14 +7,14 @@ import sys
 import anyio
 import click
 import uvicorn
-from hello_mcp_server.server import mcp, starlette_app
+from hello_mcp_server.server import mcp, app
 
 # Runners
 async def run_stdio():
     await mcp.run_stdio_async()
 
 def run_sse(host: str, port: int):
-    uvicorn.run(starlette_app, host=host, port=port)
+    uvicorn.run(app, host=host, port=port)
 
 # CLI
 @click.command()
