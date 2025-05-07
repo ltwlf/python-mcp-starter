@@ -11,6 +11,8 @@ dependencies = [
     "anyio>=3.7.0",
     "mcp @ git+https://github.com/ltwlf/python-sdk.git@main",
     "starlette>=0.46.2",
+    "python-jose[cryptography]>=3.4.0",
+    "httpx>=0.28.1",
 ]
 
 [project.optional-dependencies]
