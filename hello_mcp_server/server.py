@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 from mcp.server.sse import SseServerTransport
 from starlette.applications import Starlette
@@ -9,14 +10,18 @@ from mcp.server.auth.middleware.bearer_auth import (
     RequireAuthMiddleware, BearerAuthBackend
 )
 from starlette.middleware.authentication import AuthenticationMiddleware
+from starlette.middleware.cors import CORSMiddleware
 
+load_dotenv()
 
 from .azure_provider import AzureResourceProvider
 from .header_middleware import HeaderMiddleware
 
-ISSUER = os.environ["ISSUER"]
+ISSUER = os.environ.get("ISSUER")
 AUDIENCE = os.environ.get("AUDIENCE")
 SCOPE = os.environ.get("SCOPE").split(" ")
+
+print(f"ISSUER: {ISSUER}")
 
 provider = AzureResourceProvider(ISSUER, AUDIENCE)
 
@@ -53,12 +58,18 @@ async def handle_sse(scope, receive, send):
         )
 
 middleware = [
-    # ①  injects request.user / request.auth by calling provider.load_access_token
+    # Add CORS middleware to handle cross-origin requests
+    Middleware(
+        CORSMiddleware,
+        allow_origins=["*"],  # Configure this to be more restrictive in production
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    ),
     Middleware(
         AuthenticationMiddleware,
         backend=BearerAuthBackend(provider=provider),
     ),
-    # ②  your own header middleware
     Middleware(HeaderMiddleware),
 ]
 

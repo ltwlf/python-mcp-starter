@@ -3,11 +3,13 @@ Main entry point for the hello_world MCP application.
 This file contains the runner functions and CLI code.
 """
 import os
-from dotenv import load_dotenv
 import sys
 import anyio
 import click
 import uvicorn
+from dotenv import load_dotenv
+
+# Import after defining functions to avoid circular imports
 from hello_mcp_server.server import mcp, app
 
 # Runners
@@ -27,6 +29,7 @@ def run_sse(host: str, port: int):
 def main(sse: bool, host: str, port: int):
     # Load environment variables from .env file
     load_dotenv()
+
     if sse:
         run_sse(host, port)
     else:
